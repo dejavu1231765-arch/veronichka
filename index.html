@@ -2,36 +2,226 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Для моей любимой ❤️</title>
-    <style>
-        body { background-color: #ffeef8; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; text-align: center; color: #d63384; }
-        .card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        input { padding: 10px; border: 2px solid #ffb6c1; border-radius: 10px; outline: none; margin-bottom: 10px; }
-        button { background: #ff69b4; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; }
-        button:hover { background: #ff1493; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Головоломки для тебя ❤️</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="card">
-        <h1>С 7 месяцами! ❤️</h1>
-        <p>Введи кодовое слово (наше секретное место), чтобы открыть сюрприз:</p>
-        <input type="text" id="answer" placeholder="Твой ответ...">
-        <br>
-        <button onclick="check()">Открыть</button>
-        <h2 id="result"></h2>
+    <div class="container">
+        <header>
+            <h1>С 7 месяцами, любимая!</h1>
+            <p>Проходи все головоломки, чтобы открыть наше маленькое любовное приключение и увидеть финальные фотографии.</p>
+        </header>
+
+        <section id="stage-1" class="stage">
+            <h2>Первое задание</h2>
+            <p>Я часто дарю тебе тепло, а зимой становлюсь обязательным. Я бегу, но никогда не останавливаюсь. Что это?</p>
+            <div class="input-row">
+                <input id="answer-1" type="text" placeholder="Напиши слово здесь...">
+                <button onclick="checkStage1()">Проверить</button>
+            </div>
+            <p id="hint-1" class="hint">Подсказка: я всегда рядом с домом, но не живу в нем.</p>
+            <p id="message-1" class="message"></p>
+        </section>
+
+        <section id="stage-2" class="stage hidden">
+            <h2>Второе задание</h2>
+            <p>Поменяй цифры местами, чтобы получилось правильное равенство:</p>
+            <p><strong>5 + 2 = 2 + ?</strong></p>
+            <div class="input-row">
+                <input id="answer-2" type="text" placeholder="Введите число...">
+                <button onclick="checkStage2()">Проверить</button>
+            </div>
+            <p id="message-2" class="message"></p>
+        </section>
+
+        <section id="stage-3" class="stage hidden">
+            <h2>Третье задание</h2>
+            <p>Напиши слово, которое всегда рядом с нами: оно живет в нашей паре, в каждом сообщении и в каждой улыбке.</p>
+            <div class="input-row">
+                <input id="answer-3" type="text" placeholder="Твое слово...">
+                <button onclick="checkStage3()">Проверить</button>
+            </div>
+            <p class="hint">Подсказка: это простое и очень важное слово.</p>
+            <p id="message-3" class="message"></p>
+        </section>
+
+        <section id="stage-4" class="stage hidden">
+            <h2>Четвёртое задание</h2>
+            <p>Мы празднуем 7 месяцев вместе. Сколько месяцев будет, если добавить ещё 5?</p>
+            <div class="input-row">
+                <input id="answer-4" type="text" placeholder="Введите число...">
+                <button onclick="checkStage4()">Проверить</button>
+            </div>
+            <p class="hint">Подсказка: это число больше семи.</p>
+            <p id="message-4" class="message"></p>
+        </section>
+
+        <section id="stage-5" class="stage hidden">
+            <h2>Пятое задание</h2>
+            <p>Какое короткое слово описывает нас вместе?</p>
+            <div class="input-row">
+                <input id="answer-5" type="text" placeholder="Напиши слово...">
+                <button onclick="checkStage5()">Проверить</button>
+            </div>
+            <p class="hint">Подсказка: это мы вдвоём.</p>
+            <p id="message-5" class="message"></p>
+        </section>
+
+        <section id="final" class="stage hidden">
+            <h2>Поздравляю!</h2>
+            <p class="final-text">Ты успешно прошла все загадки. Сейчас откроется наш финальный сюрприз — несколько фотографий, которые я особенно люблю.</p>
+            <div class="gallery">
+                <img src="tamlates/мы1.png" alt="Мы 1">
+                <img src="tamlates/мы2.png" alt="Мы 2">
+            </div>
+            <button onclick="restart()">Пройти заново</button>
+        </section>
     </div>
 
     <script>
-        function check() {
-            const val = document.getElementById('answer').value.toLowerCase().trim();
-            // ЗАМЕНИ 'париж' на ваше секретное слово
-            if (val === 'париж') { 
-                document.getElementById('result').innerText = 'Ура! Я тебя очень люблю! С праздником! 😘';
-                document.body.style.backgroundColor = '#ff69b4';
-            } else {
-                alert('Неа, вспоминай лучше! 😊');
+        const STORAGE_KEY = 'veronichkaPuzzleState';
+        const answers = {
+            stage1: 'река',
+            stage2: '5',
+            stage3: 'любовь',
+            stage4: 'год',
+            stage5: 'мы'
+        };
+
+        function saveState(state) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
+
+        function loadState() {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) return null;
+            try {
+                return JSON.parse(raw);
+            } catch (e) {
+                return null;
             }
         }
+
+        function applyState(state) {
+            if (!state) return;
+            if (state.answers) {
+                if (state.answers.stage1) document.getElementById('answer-1').value = state.answers.stage1;
+                if (state.answers.stage2) document.getElementById('answer-2').value = state.answers.stage2;
+                if (state.answers.stage3) document.getElementById('answer-3').value = state.answers.stage3;
+                if (state.answers.stage4) document.getElementById('answer-4').value = state.answers.stage4;
+                if (state.answers.stage5) document.getElementById('answer-5').value = state.answers.stage5;
+            }
+            if (state.currentStage === 6) {
+                showStage('final');
+            } else if (state.currentStage) {
+                showStage('stage-' + state.currentStage);
+            }
+        }
+
+        function loadProgress() {
+            const state = loadState();
+            if (state) applyState(state);
+        }
+
+        function showStage(stageId) {
+            document.querySelectorAll('.stage').forEach(section => {
+                section.classList.toggle('hidden', section.id !== stageId);
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function checkStage1() {
+            const value = document.getElementById('answer-1').value.toLowerCase().trim();
+            const message = document.getElementById('message-1');
+            if (value === answers.stage1) {
+                message.textContent = 'Правильно! Ты супер. 😊';
+                const state = loadState() || { currentStage: 1, answers: {} };
+                state.currentStage = 2;
+                state.answers.stage1 = value;
+                saveState(state);
+                setTimeout(() => showStage('stage-2'), 800);
+            } else {
+                message.textContent = 'Почти, подумай еще. Подсказка поможет!';
+            }
+        }
+
+        function checkStage2() {
+            const value = document.getElementById('answer-2').value.trim();
+            const message = document.getElementById('message-2');
+            if (value === answers.stage2) {
+                message.textContent = 'Верно! Так держать. ✨';
+                const state = loadState() || { currentStage: 2, answers: {} };
+                state.currentStage = 3;
+                state.answers.stage2 = value;
+                saveState(state);
+                setTimeout(() => showStage('stage-3'), 800);
+            } else {
+                message.textContent = 'Неправильно, попробуй еще раз.';
+            }
+        }
+
+        function checkStage3() {
+            const value = document.getElementById('answer-3').value.toLowerCase().trim();
+            const message = document.getElementById('message-3');
+            if (value === answers.stage3) {
+                message.textContent = 'Правильно! Готова к следующему этапу? ❤️';
+                const state = loadState() || { currentStage: 3, answers: {} };
+                state.currentStage = 4;
+                state.answers.stage3 = value;
+                saveState(state);
+                setTimeout(() => showStage('stage-4'), 800);
+            } else {
+                message.textContent = 'Еще раз, твоё слово очень близко...';
+            }
+        }
+
+        function checkStage4() {
+            const value = document.getElementById('answer-4').value.trim();
+            const message = document.getElementById('message-4');
+            if (value === answers.stage4) {
+                message.textContent = 'Верно! Ещё одно задание пройдено. ✨';
+                const state = loadState() || { currentStage: 4, answers: {} };
+                state.currentStage = 5;
+                state.answers.stage4 = value;
+                saveState(state);
+                setTimeout(() => showStage('stage-5'), 800);
+            } else {
+                message.textContent = 'Почти — попробуй ещё раз.';
+            }
+        }
+
+        function checkStage5() {
+            const value = document.getElementById('answer-5').value.toLowerCase().trim();
+            const message = document.getElementById('message-5');
+            if (value === answers.stage5) {
+                message.textContent = 'Да! Ты справилась со всеми заданиями. ❤️';
+                const state = loadState() || { currentStage: 5, answers: {} };
+                state.currentStage = 6;
+                state.answers.stage5 = value;
+                saveState(state);
+                setTimeout(() => showStage('final'), 1000);
+            } else {
+                message.textContent = 'Еще раз, это слово о нас двоих.';
+            }
+        }
+
+        function restart() {
+            document.getElementById('answer-1').value = '';
+            document.getElementById('answer-2').value = '';
+            document.getElementById('answer-3').value = '';
+            document.getElementById('answer-4').value = '';
+            document.getElementById('answer-5').value = '';
+            document.getElementById('message-1').textContent = '';
+            document.getElementById('message-2').textContent = '';
+            document.getElementById('message-3').textContent = '';
+            document.getElementById('message-4').textContent = '';
+            document.getElementById('message-5').textContent = '';
+            localStorage.removeItem(STORAGE_KEY);
+            showStage('stage-1');
+        }
+
+        window.onload = loadProgress;
     </script>
 </body>
 </html>
