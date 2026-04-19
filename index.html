@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Для моей любимой ❤️</title>
+    <style>
+        body { background-color: #ffeef8; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; text-align: center; color: #d63384; }
+        .card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        input { padding: 10px; border: 2px solid #ffb6c1; border-radius: 10px; outline: none; margin-bottom: 10px; }
+        button { background: #ff69b4; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; }
+        button:hover { background: #ff1493; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>С 7 месяцами! ❤️</h1>
+        <p>Введи кодовое слово (наше секретное место), чтобы открыть сюрприз:</p>
+        <input type="text" id="answer" placeholder="Твой ответ...">
+        <br>
+        <button onclick="check()">Открыть</button>
+        <h2 id="result"></h2>
+    </div>
+
+    <script>
+        function check() {
+            const val = document.getElementById('answer').value.toLowerCase().trim();
+            // ЗАМЕНИ 'париж' на ваше секретное слово
+            if (val === 'париж') { 
+                document.getElementById('result').innerText = 'Ура! Я тебя очень люблю! С праздником! 😘';
+                document.body.style.backgroundColor = '#ff69b4';
+            } else {
+                alert('Неа, вспоминай лучше! 😊');
+            }
+        }
+    </script>
+</body>
+</html>
